@@ -1,20 +1,18 @@
-import { DynamoDB, ListTablesCommand } from '@aws-sdk/client-dynamodb'
-
-const expressionString = (...strings: Array<string>) => {
-  const expression = strings
-    .filter((str) => str)
-    .join(' AND ')
-    .trim()
-  return expression === '' ? undefined : expression
-}
-
-const expressionObject = (...objects: Array<object>) => {
-  const expression = Object.create(null)
-  Object.assign(expression, ...objects)
-  return Object.keys(expression).length === 0 ? undefined : expression
-}
-
-export default expressionObject
+import { DynamoDB, AttributeValue } from '@aws-sdk/client-dynamodb'
+//
+// const expressionString = (...strings: Array<string>) => {
+//   const expression = strings
+//     .filter((str) => str)
+//     .join(' AND ')
+//     .trim()
+//   return expression === '' ? undefined : expression
+// }
+//
+// const expressionObject = (...objects: Array<object>) => {
+//   const expression = Object.create(null)
+//   Object.assign(expression, ...objects)
+//   return Object.keys(expression).length === 0 ? undefined : expression
+// }
 
 test('wip', async () => {
   const client = new DynamoDB({
@@ -74,7 +72,7 @@ test('wip', async () => {
     TableName: eventsTableName,
     Item: {
       index: {
-        S: (new Date(event.timestamp).toISOString() + Math.random()).replace(/[\.:]/g, '-'),
+        S: (new Date(event.timestamp).toISOString() + Math.random()).replace(/[.:]/g, '-'),
       },
       aggregateId: {
         S: event.aggregateId,
@@ -95,9 +93,18 @@ test('wip', async () => {
   })
   console.log('putItem end')
 
-  console.log(
-    await client.scan({
-      TableName: eventsTableName
-    })
-  )
+  const loadAllEvents = async () => {
+    let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
+    do {
+      const result: any = await client.scan({
+        TableName: eventsTableName,
+        ExclusiveStartKey: PrevLastEvaluatedKey,
+      })
+      const { Items, LastEvaluatedKey } = result
+      console.log(...Items)
+      PrevLastEvaluatedKey = LastEvaluatedKey
+    } while (PrevLastEvaluatedKey !== undefined)
+  }
+
+  await loadAllEvents()
 })
