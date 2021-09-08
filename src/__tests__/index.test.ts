@@ -25,11 +25,11 @@ test('wip', async () => {
     },
     AttributeDefinitions: [
       { AttributeName: 'index', AttributeType: 'S' },
-      { AttributeName: 'type', AttributeType: 'S' },
-      { AttributeName: 'payload', AttributeType: 'S' },
-      { AttributeName: 'aggregateId', AttributeType: 'S' },
+      // { AttributeName: 'type', AttributeType: 'S' },
+      // { AttributeName: 'payload', AttributeType: 'S' },
+      // { AttributeName: 'aggregateId', AttributeType: 'S' },
       { AttributeName: 'aggregateVersion', AttributeType: 'N' },
-      { AttributeName: 'timestamp', AttributeType: 'N' },
+      // { AttributeName: 'timestamp', AttributeType: 'N' },
     ],
     KeySchema: [
       {
