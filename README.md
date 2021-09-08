@@ -1,0 +1,1 @@
+# resolve-dynamodb-eventstore-adapter
