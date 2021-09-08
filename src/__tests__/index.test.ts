@@ -14,6 +14,70 @@ import { DynamoDB, AttributeValue } from '@aws-sdk/client-dynamodb'
 //   return Object.keys(expression).length === 0 ? undefined : expression
 // }
 
+type Event = {
+  aggregateId: string
+  aggregateVersion: number
+  type: string
+  payload: Record<string, any>
+  timestamp: number
+}
+
+type DynamoDBEvent = {
+  primaryKey: {
+    S: string
+  }
+  aggregateId: {
+    S: string
+  }
+  aggregateVersion: {
+    N: string
+  }
+  type: {
+    S: string
+  }
+  payload: {
+    S: string
+  }
+  timestamp: {
+    N: string
+  }
+}
+
+const getPrimaryKey = (event: Event) =>
+  `${new Date(event.timestamp).toISOString().replace(ISORegExp, '-')}-${event.aggregateId}-${
+    event.aggregateVersion
+  }`
+
+const ISORegExp = /[.:]/g
+const encodeEvent = (event: Event): DynamoDBEvent => ({
+  primaryKey: {
+    S: getPrimaryKey(event),
+  },
+  aggregateId: {
+    S: event.aggregateId,
+  },
+  aggregateVersion: {
+    N: `${event.aggregateVersion}`,
+  },
+  type: {
+    S: event.type,
+  },
+  payload: {
+    S: JSON.stringify(event.payload),
+  },
+  timestamp: {
+    N: `${event.timestamp}`,
+  },
+})
+
+const decodeEvent = (item: DynamoDBEvent): Event => ({
+  aggregateId: item.aggregateId.S,
+  aggregateVersion: +item.aggregateVersion.N,
+  type: item.type.S,
+  payload: JSON.parse(item.payload.S),
+  timestamp: +item.timestamp.N,
+})
+
 test('wip', async () => {
   const client = new DynamoDB({
     region: 'test',
@@ -38,7 +102,7 @@ test('wip', async () => {
       StreamViewType: 'NEW_IMAGE',
     },
     AttributeDefinitions: [
-      { AttributeName: 'index', AttributeType: 'S' },
+      { AttributeName: 'primaryKey', AttributeType: 'S' },
       // { AttributeName: 'type', AttributeType: 'S' },
       // { AttributeName: 'payload', AttributeType: 'S' },
       // { AttributeName: 'aggregateId', AttributeType: 'S' },
@@ -47,7 +111,7 @@ test('wip', async () => {
     ],
     KeySchema: [
       {
-        AttributeName: 'index',
+        AttributeName: 'primaryKey',
         KeyType: 'HASH',
       },
       {
@@ -57,7 +121,7 @@ test('wip', async () => {
     ],
   })
 
-  const event = {
+  const event: Event = {
     aggregateId: 'id1',
     aggregateVersion: 1,
     type: 'QQQ',
@@ -70,26 +134,7 @@ test('wip', async () => {
   console.log('putItem start')
   await client.putItem({
     TableName: eventsTableName,
-    Item: {
-      index: {
-        S: (new Date(event.timestamp).toISOString() + Math.random()).replace(/[.:]/g, '-'),
-      },
-      aggregateId: {
-        S: event.aggregateId,
-      },
-      aggregateVersion: {
-        N: `${event.aggregateVersion}`,
-      },
-      type: {
-        S: event.type,
-      },
-      payload: {
-        S: JSON.stringify(event.payload),
-      },
-      timestamp: {
-        N: `${event.timestamp}`,
-      },
-    },
+    Item: encodeEvent(event),
   })
   console.log('putItem end')
 
@@ -101,7 +146,7 @@ test('wip', async () => {
         ExclusiveStartKey: PrevLastEvaluatedKey,
       })
       const { Items, LastEvaluatedKey } = result
-      console.log(...Items)
+      console.log(...Items.map(decodeEvent))
       PrevLastEvaluatedKey = LastEvaluatedKey
     } while (PrevLastEvaluatedKey !== undefined)
   }
