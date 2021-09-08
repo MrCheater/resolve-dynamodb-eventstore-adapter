@@ -1,82 +1,10 @@
-import { DynamoDB, AttributeValue } from '@aws-sdk/client-dynamodb'
-//
-// const expressionString = (...strings: Array<string>) => {
-//   const expression = strings
-//     .filter((str) => str)
-//     .join(' AND ')
-//     .trim()
-//   return expression === '' ? undefined : expression
-// }
-//
-// const expressionObject = (...objects: Array<object>) => {
-//   const expression = Object.create(null)
-//   Object.assign(expression, ...objects)
-//   return Object.keys(expression).length === 0 ? undefined : expression
-// }
+import { DynamoDB } from '@aws-sdk/client-dynamodb'
 
-type Event = {
-  aggregateId: string
-  aggregateVersion: number
-  type: string
-  payload: Record<string, any>
-  timestamp: number
-}
+import type { ResolveEvent } from '../types'
 
-type DynamoDBEvent = {
-  primaryKey: {
-    S: string
-  }
-  aggregateId: {
-    S: string
-  }
-  aggregateVersion: {
-    N: string
-  }
-  type: {
-    S: string
-  }
-  payload: {
-    S: string
-  }
-  timestamp: {
-    N: string
-  }
-}
-
-const getPrimaryKey = (event: Event) =>
-  `${new Date(event.timestamp).toISOString().replace(ISORegExp, '-')}-${event.aggregateId}-${
-    event.aggregateVersion
-  }`
-
-const ISORegExp = /[.:]/g
-const encodeEvent = (event: Event): DynamoDBEvent => ({
-  primaryKey: {
-    S: getPrimaryKey(event),
-  },
-  aggregateId: {
-    S: event.aggregateId,
-  },
-  aggregateVersion: {
-    N: `${event.aggregateVersion}`,
-  },
-  type: {
-    S: event.type,
-  },
-  payload: {
-    S: JSON.stringify(event.payload),
-  },
-  timestamp: {
-    N: `${event.timestamp}`,
-  },
-})
-
-const decodeEvent = (item: DynamoDBEvent): Event => ({
-  aggregateId: item.aggregateId.S,
-  aggregateVersion: +item.aggregateVersion.N,
-  type: item.type.S,
-  payload: JSON.parse(item.payload.S),
-  timestamp: +item.timestamp.N,
-})
+import init from '../init'
+import saveEvent from '../save-event'
+import loadAllEvents from '../load-all-events'
 
 test('wip', async () => {
   const client = new DynamoDB({
@@ -94,34 +22,9 @@ test('wip', async () => {
 
   const eventsTableName = 'events'
 
-  await client.createTable({
-    TableName: 'events',
-    BillingMode: 'PAY_PER_REQUEST',
-    StreamSpecification: {
-      StreamEnabled: true,
-      StreamViewType: 'NEW_IMAGE',
-    },
-    AttributeDefinitions: [
-      { AttributeName: 'primaryKey', AttributeType: 'S' },
-      // { AttributeName: 'type', AttributeType: 'S' },
-      // { AttributeName: 'payload', AttributeType: 'S' },
-      // { AttributeName: 'aggregateId', AttributeType: 'S' },
-      { AttributeName: 'aggregateVersion', AttributeType: 'N' },
-      // { AttributeName: 'timestamp', AttributeType: 'N' },
-    ],
-    KeySchema: [
-      {
-        AttributeName: 'primaryKey',
-        KeyType: 'HASH',
-      },
-      {
-        AttributeName: 'aggregateVersion',
-        KeyType: 'RANGE',
-      },
-    ],
-  })
+  await init({ client, eventsTableName })
 
-  const event: Event = {
+  const event: ResolveEvent = {
     aggregateId: 'id1',
     aggregateVersion: 1,
     type: 'QQQ',
@@ -131,25 +34,7 @@ test('wip', async () => {
     timestamp: Date.now(),
   }
 
-  console.log('putItem start')
-  await client.putItem({
-    TableName: eventsTableName,
-    Item: encodeEvent(event),
-  })
-  console.log('putItem end')
+  await saveEvent({ client, eventsTableName }, event)
 
-  const loadAllEvents = async () => {
-    let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
-    do {
-      const result: any = await client.scan({
-        TableName: eventsTableName,
-        ExclusiveStartKey: PrevLastEvaluatedKey,
-      })
-      const { Items, LastEvaluatedKey } = result
-      console.log(...Items.map(decodeEvent))
-      PrevLastEvaluatedKey = LastEvaluatedKey
-    } while (PrevLastEvaluatedKey !== undefined)
-  }
-
-  await loadAllEvents()
+  await loadAllEvents({ client, eventsTableName })
 })
