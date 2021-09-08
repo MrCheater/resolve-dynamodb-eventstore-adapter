@@ -1,0 +1,34 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!*/**'
+
+jobs:
+  on-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Setup DynamoDB Local
+        uses: rrainn/dynamodb-action@v2.0.0
+        with:
+          port: 8000
+          cors: '*'
+
+      - name: Install
+        run: |
+          yarn install
+
+      - name: Tests
+        run: |
+          yarn test
+
