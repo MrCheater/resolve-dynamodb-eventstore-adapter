@@ -98,7 +98,6 @@ test('wip', async () => {
   console.log(
     await client.query({
       TableName: eventsTableName,
-      IndexName: 'index',
       KeyConditionExpression: expressionString(),
       FilterExpression: expressionString(),
       ExpressionAttributeNames: expressionObject(),
