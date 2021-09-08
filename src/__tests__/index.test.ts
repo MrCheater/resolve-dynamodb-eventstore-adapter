@@ -1,5 +1,21 @@
 import { DynamoDB, ListTablesCommand } from '@aws-sdk/client-dynamodb'
 
+const expressionString = (...strings: Array<string>) => {
+  const expression = strings
+    .filter((str) => str)
+    .join(' AND ')
+    .trim()
+  return expression === '' ? undefined : expression
+}
+
+const expressionObject = (...objects: Array<object>) => {
+  const expression = Object.create(null)
+  Object.assign(expression, ...objects)
+  return Object.keys(expression).length === 0 ? undefined : expression
+}
+
+export default expressionObject
+
 test('wip', async () => {
   const client = new DynamoDB({
     region: 'test',
@@ -82,6 +98,12 @@ test('wip', async () => {
   console.log(
     await client.query({
       TableName: eventsTableName,
+      IndexName: 'index',
+      KeyConditionExpression: expressionString(),
+      FilterExpression: expressionString(),
+      ExpressionAttributeNames: expressionObject(),
+      ExpressionAttributeValues: expressionObject(),
+      ScanIndexForward: true,
     })
   )
 })
