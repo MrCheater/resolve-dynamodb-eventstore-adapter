@@ -96,13 +96,8 @@ test('wip', async () => {
   console.log('putItem end')
 
   console.log(
-    await client.query({
-      TableName: eventsTableName,
-      KeyConditionExpression: expressionString(),
-      FilterExpression: expressionString(),
-      ExpressionAttributeNames: expressionObject(),
-      ExpressionAttributeValues: expressionObject(),
-      ScanIndexForward: true,
+    await client.scan({
+      TableName: eventsTableName
     })
   )
 })
