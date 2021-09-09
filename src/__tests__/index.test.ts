@@ -30,11 +30,11 @@ test('wip', async () => {
     timestamp: Date.now(),
   }
 
-  await saveEvent({ client, eventsTableName }, event)
+  await saveEvent({ client, eventsTableName, eventStoreId }, event)
 
-  await loadAllEvents({ client, eventsTableName })
+  await loadAllEvents({ client, eventsTableName, eventStoreId })
 
-  await saveEvent({ client, eventsTableName }, event)
+  await saveEvent({ client, eventsTableName, eventStoreId }, event)
 
-  await loadAllEvents({ client, eventsTableName })
+  await loadAllEvents({ client, eventsTableName, eventStoreId })
 })

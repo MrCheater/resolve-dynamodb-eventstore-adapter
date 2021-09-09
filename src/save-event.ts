@@ -7,16 +7,18 @@ import encodeEvent from './encode-event'
 import ConcurrentError from './concurrent-error'
 
 const saveEvent = async (
-  pool: { client: DynamoDBClient; eventsTableName: string },
+  pool: { client: DynamoDBClient; eventsTableName: string, eventStoreId: string },
   event: ResolveEvent
 ) => {
   const { client, eventsTableName } = pool
+
+
 
   const command = new PutItemCommand({
     TableName: eventsTableName,
     Item: encodeEvent(event),
     ConditionExpression:
-      'attribute_not_exists(aggregateId) AND attribute_not_exists(aggregateVersion)',
+      'attribute_not_exists(streamId) AND attribute_not_exists(streamVersion)',
   })
 
   try {

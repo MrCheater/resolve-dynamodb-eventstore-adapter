@@ -3,17 +3,23 @@ export type ResolveEvent = {
   aggregateVersion: number
   type: string
   payload: Record<string, any>
-  timestamp: number
+  timestamp: number,
+  streamIds?: Record<string, number>
+} | {
+  streamIds: Record<string, number>
+  type: string
+  payload: Record<string, any>
+  timestamp: number,
 }
 
 export type DynamoDBEvent = {
   primaryKey: {
     S: string
   }
-  aggregateId: {
+  streamId: {
     S: string
   }
-  aggregateVersion: {
+  streamVersion: {
     N: string
   }
   type: {
