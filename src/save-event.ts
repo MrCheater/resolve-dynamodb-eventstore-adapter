@@ -25,6 +25,7 @@ const saveEvent = async (
     if (error.code === 'ConditionalCheckFailedException') {
       throw new ConcurrentError()
     }
+    throw error
   }
 }
 
