@@ -1,17 +1,20 @@
-import type { AttributeValue, DynamoDB } from '@aws-sdk/client-dynamodb'
+import type { DynamoDBClient, AttributeValue } from '@aws-sdk/client-dynamodb'
+import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 
 import decodeEvent from './decode-event'
 
-const loadAllEvents = async (pool: { client: DynamoDB; eventsTableName: string }) => {
+const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string }) => {
   const { client, eventsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
   do {
-    const result: any = await client.scan({
+    const command = new ScanCommand({
       TableName: eventsTableName,
       ExclusiveStartKey: PrevLastEvaluatedKey,
     })
-    const { Items, LastEvaluatedKey } = result
+    const result: ScanCommandOutput = await client.send(command)
+    const { Items = [], LastEvaluatedKey } = result
+
     console.log(...Items.map(decodeEvent))
     PrevLastEvaluatedKey = LastEvaluatedKey
   } while (PrevLastEvaluatedKey !== undefined)

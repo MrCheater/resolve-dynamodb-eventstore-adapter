@@ -1,9 +1,10 @@
-import type { DynamoDB } from '@aws-sdk/client-dynamodb'
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { CreateTableCommand } from '@aws-sdk/client-dynamodb'
 
-const init = async (pool: { client: DynamoDB; eventsTableName: string }) => {
+const init = async (pool: { client: DynamoDBClient; eventsTableName: string }) => {
   const { client, eventsTableName } = pool
 
-  await client.createTable({
+  const command = new CreateTableCommand({
     TableName: eventsTableName,
     BillingMode: 'PAY_PER_REQUEST',
     StreamSpecification: {
@@ -12,11 +13,7 @@ const init = async (pool: { client: DynamoDB; eventsTableName: string }) => {
     },
     AttributeDefinitions: [
       { AttributeName: 'primaryKey', AttributeType: 'S' },
-      // { AttributeName: 'type', AttributeType: 'S' },
-      // { AttributeName: 'payload', AttributeType: 'S' },
-      // { AttributeName: 'aggregateId', AttributeType: 'S' },
       { AttributeName: 'aggregateVersion', AttributeType: 'N' },
-      // { AttributeName: 'timestamp', AttributeType: 'N' },
     ],
     KeySchema: [
       {
@@ -29,6 +26,8 @@ const init = async (pool: { client: DynamoDB; eventsTableName: string }) => {
       },
     ],
   })
+
+  await client.send(command)
 }
 
 export default init

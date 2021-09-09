@@ -1,4 +1,4 @@
-import { DynamoDB } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 import type { ResolveEvent } from '../types'
 
@@ -7,7 +7,7 @@ import saveEvent from '../save-event'
 import loadAllEvents from '../load-all-events'
 
 test('wip', async () => {
-  const client = new DynamoDB({
+  const client = new DynamoDBClient({
     region: 'test',
     endpoint: { hostname: 'localhost', port: 8000, path: '/', protocol: 'http' },
     credentials: {
@@ -15,10 +15,6 @@ test('wip', async () => {
       secretAccessKey: 'secretAccessKey',
     },
   })
-
-  const results = await client.listTables({})
-
-  expect(results?.TableNames).toEqual([])
 
   const eventsTableName = 'events'
 
