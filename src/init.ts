@@ -12,18 +12,13 @@ const init = async (pool: { client: DynamoDBClient; eventsTableName: string }) =
       StreamViewType: 'NEW_IMAGE',
     },
     AttributeDefinitions: [
-      { AttributeName: 'primaryKey', AttributeType: 'S' },
-      { AttributeName: 'aggregateVersion', AttributeType: 'N' },
+      { AttributeName: 'primaryKey', AttributeType: 'S' }
     ],
     KeySchema: [
       {
         AttributeName: 'primaryKey',
         KeyType: 'HASH',
-      },
-      {
-        AttributeName: 'aggregateVersion',
-        KeyType: 'RANGE',
-      },
+      }
     ],
   })
 
