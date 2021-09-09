@@ -1,9 +1,10 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb'
+import { PutItemCommand } from '@aws-sdk/client-dynamodb'
 
 import type { ResolveEvent } from './types'
 
 import encodeEvent from './encode-event'
+import ConcurrentError from './concurrent-error'
 
 const saveEvent = async (
   pool: { client: DynamoDBClient; eventsTableName: string },
@@ -11,18 +12,20 @@ const saveEvent = async (
 ) => {
   const { client, eventsTableName } = pool
 
-  const command = new TransactWriteItemsCommand({
-    TransactItems: [
-      {
-        Put: {
-          TableName: eventsTableName,
-          Item: encodeEvent(event),
-        },
-      },
-    ],
+  const command = new PutItemCommand({
+    TableName: eventsTableName,
+    Item: encodeEvent(event),
+    ConditionExpression:
+      'attribute_not_exists(aggregateId) AND attribute_not_exists(aggregateVersion)',
   })
 
-  await client.send(command)
+  try {
+    await client.send(command)
+  } catch (error) {
+    if (error.code === 'ConditionalCheckFailedException') {
+      throw new ConcurrentError()
+    }
+  }
 }
 
 export default saveEvent

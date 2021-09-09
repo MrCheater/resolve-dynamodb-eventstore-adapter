@@ -33,4 +33,8 @@ test('wip', async () => {
   await saveEvent({ client, eventsTableName }, event)
 
   await loadAllEvents({ client, eventsTableName })
+  
+  await saveEvent({ client, eventsTableName }, event)
+
+  await loadAllEvents({ client, eventsTableName })
 })
