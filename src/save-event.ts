@@ -1,5 +1,5 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { PutItemCommand } from '@aws-sdk/client-dynamodb'
+import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb'
 
 import type { ResolveEvent } from './types'
 
@@ -11,9 +11,15 @@ const saveEvent = async (
 ) => {
   const { client, eventsTableName } = pool
 
-  const command = new PutItemCommand({
-    TableName: eventsTableName,
-    Item: encodeEvent(event),
+  const command = new TransactWriteItemsCommand({
+    TransactItems: [
+      {
+        Put: {
+          TableName: eventsTableName,
+          Item: encodeEvent(event),
+        },
+      },
+    ],
   })
 
   await client.send(command)
