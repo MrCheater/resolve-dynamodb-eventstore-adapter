@@ -22,7 +22,8 @@ const saveEvent = async (
   try {
     await client.send(command)
   } catch (error) {
-    if (error.code === 'ConditionalCheckFailedException') {
+    console.log('code', error.code)
+    if (error.name === 'ConditionalCheckFailedException') {
       throw new ConcurrentError()
     }
     throw error
