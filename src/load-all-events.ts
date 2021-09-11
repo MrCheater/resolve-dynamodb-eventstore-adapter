@@ -2,11 +2,33 @@ import type { DynamoDBClient, AttributeValue } from '@aws-sdk/client-dynamodb'
 import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 
 import decodeEvent from './decode-event'
+import getPrimaryKey from './get-primary-key'
 
-const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string }, eventStoreId: string) => {
+const loadAllEvents = async (
+  pool: { client: DynamoDBClient; eventsTableName: string },
+  eventStoreId: string,
+  startTime?: number
+) => {
   const { client, eventsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
+
+  if (startTime != null) {
+    PrevLastEvaluatedKey = {
+      primaryKey: {
+        S: getPrimaryKey({
+          requestId: '00000',
+          eventStoreId,
+          type: 'type',
+          payload: {},
+          timestamp: startTime,
+          aggregateVersion: 0,
+          aggregateId: 'aggregateId',
+        }),
+      },
+    }
+  }
+
   do {
     const command = new ScanCommand({
       TableName: eventsTableName,
