@@ -5,12 +5,13 @@ import type { ResolveEvent } from './types'
 
 // import encodeEvent from './encode-event'
 import ConcurrentError from './concurrent-error'
+import getPrimaryKey from './get-primary-key'
 
 const saveEvent = async (
-  pool: { client: DynamoDBClient; eventsTableName: string, eventStoreId: string },
+  pool: { client: DynamoDBClient; eventsTableName: string},
   event: ResolveEvent
 ) => {
-  const { client, eventsTableName, eventStoreId} = pool
+  const { client, eventsTableName} = pool
 
   // const items = encodeEvent(event)
 
@@ -20,11 +21,11 @@ const saveEvent = async (
         Put: {
           TableName: eventsTableName,
           Item: {
-            eventStoreId: {
-              S: eventStoreId
+            primaryKey: {
+              S: getPrimaryKey(event)
             },
-            timestamp: {
-              N: `${event.timestamp}.${eventStoreId}`
+            event: {
+              S: JSON.stringify(event)
             }
           }
 //          Item: encodeEvent(event),

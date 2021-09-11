@@ -17,11 +17,14 @@ test('wip', async () => {
   })
 
   const eventStoreId = '00001'
+  const requestId = '00002'
   const eventsTableName = 'events'
 
   await init({ client, eventsTableName })
 
   const event: ResolveEvent = {
+    eventStoreId,
+    requestId,
     aggregateId: 'id1',
     aggregateVersion: 1,
     type: 'QQQ',
@@ -31,11 +34,11 @@ test('wip', async () => {
     timestamp: Date.now(),
   }
 
-  await saveEvent({ client, eventsTableName, eventStoreId }, event)
+  await saveEvent({ client, eventsTableName }, event)
 
-  await loadAllEvents({ client, eventsTableName, eventStoreId })
+  await loadAllEvents({ client, eventsTableName }, eventStoreId)
 
-  await saveEvent({ client, eventsTableName, eventStoreId }, event)
+  await saveEvent({ client, eventsTableName }, event)
 
-  await loadAllEvents({ client, eventsTableName, eventStoreId })
+  await loadAllEvents({ client, eventsTableName }, eventStoreId)
 })

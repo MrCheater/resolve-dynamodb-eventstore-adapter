@@ -1,4 +1,6 @@
 export type ResolveCQRSEvent = {
+  eventStoreId: string,
+  requestId: string
   aggregateId: string
   aggregateVersion: number
   type: string
@@ -8,6 +10,8 @@ export type ResolveCQRSEvent = {
 }
 
 export type ResolveRawEvent = {
+  eventStoreId: string,
+  requestId: string
   streamIds: Record<string, number>
   type: string
   payload: Record<string, any>
@@ -26,10 +30,7 @@ export type DynamoDBEvent = {
   eventStoreId: {
     S: string
   }
-  primaryKey: {
-    S: string
-  }
-  secondaryKey: {
+  timestamp: {
     N: string
   }
   streamId: {
@@ -44,9 +45,7 @@ export type DynamoDBEvent = {
   payload: {
     S: string
   }
-  timestamp: {
-    N: string
-  }
+
   requestId: {
     S: string
   }
