@@ -2,23 +2,20 @@ import type { DynamoDBEvent, ResolveEvent, isResolveCQRSEvent, isResolveRawEvent
 
 import getPrimaryKey from './get-primary-key'
 
-const encodeEvent = (event: ResolveEvent, eventStoreId: string, requestId: string): Array<DynamoDBEvent> => {
+const encodeEvent = (event: ResolveEvent): Array<DynamoDBEvent> => {
   const items: Array<DynamoDBEvent> = []
 
-  const primaryKey = getPrimaryKey(event, eventStoreId, requestId)
-  const secondaryKey = 0
+  const primaryKey = getPrimaryKey(event)
   const streamId = 'streamId'
 
   const item: DynamoDBEvent = {
     eventStoreId: {
-      S: eventStoreId,
+      S: event.eventStoreId,
     },
     primaryKey: {
-      S: getPrimaryKey(event, eventStoreId, requestId),
+      S: getPrimaryKey(event),
     },
-    secondaryKey: {
-      N: `${secondaryKey}`,
-    },
+
     streamId: {
       S: streamId,
     },
@@ -35,8 +32,8 @@ const encodeEvent = (event: ResolveEvent, eventStoreId: string, requestId: strin
       N: `${event.timestamp}`,
     },
     requestId: {
-      S: requestId
-    }
+      S: event.requestId,
+    },
   }
 
   return items

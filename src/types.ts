@@ -29,6 +29,9 @@ export const isResolveRawEvent = (event:ResolveEvent): event is ResolveRawEvent 
 export type DynamoDBEvent = {
   eventStoreId: {
     S: string
+  },
+  primaryKey: {
+    S: string
   }
   timestamp: {
     N: string
