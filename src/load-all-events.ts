@@ -3,7 +3,7 @@ import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 
 import decodeEvent from './decode-event'
 
-const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string, eventStoreId: string }) => {
+const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string }, eventStoreId: string) => {
   const { client, eventsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
