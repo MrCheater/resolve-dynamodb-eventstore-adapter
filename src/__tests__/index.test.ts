@@ -16,6 +16,7 @@ test('wip', async () => {
     },
   })
 
+  const eventStoreId = '00001'
   const eventsTableName = 'events'
 
   await init({ client, eventsTableName })

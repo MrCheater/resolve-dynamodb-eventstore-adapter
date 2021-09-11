@@ -3,7 +3,7 @@ import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 
 import decodeEvent from './decode-event'
 
-const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string }) => {
+const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: string, eventStoreId: string }) => {
   const { client, eventsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
@@ -15,7 +15,8 @@ const loadAllEvents = async (pool: { client: DynamoDBClient; eventsTableName: st
     const result: ScanCommandOutput = await client.send(command)
     const { Items = [], LastEvaluatedKey } = result
 
-    console.log(...Items.map(decodeEvent))
+    console.log(...Items)
+    //console.log(...Items.map(decodeEvent))
     PrevLastEvaluatedKey = LastEvaluatedKey
   } while (PrevLastEvaluatedKey !== undefined)
 }
