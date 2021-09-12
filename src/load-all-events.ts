@@ -38,7 +38,16 @@ const loadAllEvents = async (
       TableName: eventsTableName,
       ExclusiveStartKey: PrevLastEvaluatedKey,
       ScanIndexForward: true,
-      Limit: 2
+      Limit: 2,
+      KeyConditions: {
+        _: {
+          ComparisonOperator: "NE",
+          AttributeValueList: [
+            { BOOL: true }
+          ]
+        }
+      },
+
     }))
 
     console.log('LastEvaluatedKey',LastEvaluatedKey)
