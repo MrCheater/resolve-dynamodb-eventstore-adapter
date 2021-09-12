@@ -13,25 +13,25 @@ const loadAllEvents = async (
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
 
-  if (cursor != null) {
-    PrevLastEvaluatedKey = {
-      [AttributeKeys.Cursor]: {
-        S: cursor,
-      },
-    }
-  } else {
-    PrevLastEvaluatedKey = {
-      [AttributeKeys.Cursor]: {
-        S: await getEventStoreStartCursor(
-          {
-            client,
-            cursorsTableName,
-          },
-          eventStoreId
-        ),
-      },
-    }
-  }
+  // if (cursor != null) {
+  //   PrevLastEvaluatedKey = {
+  //     [AttributeKeys.Cursor]: {
+  //       S: cursor,
+  //     },
+  //   }
+  // } else {
+  //   PrevLastEvaluatedKey = {
+  //     [AttributeKeys.Cursor]: {
+  //       S: await getEventStoreStartCursor(
+  //         {
+  //           client,
+  //           cursorsTableName,
+  //         },
+  //         eventStoreId
+  //       ),
+  //     },
+  //   }
+  // }
 
   do {
     const command = new ScanCommand({
@@ -40,6 +40,8 @@ const loadAllEvents = async (
     })
     const result: ScanCommandOutput = await client.send(command)
     const { Items = [], LastEvaluatedKey } = result
+
+    console.log(LastEvaluatedKey)
 
     for (const Item of Items) {
       const event = JSON.parse((Item as any)[AttributeKeys.Event].S)
