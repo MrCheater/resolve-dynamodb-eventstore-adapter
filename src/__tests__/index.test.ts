@@ -36,7 +36,7 @@ test('wip', async () => {
       eventStoreId,
       requestId,
       aggregateId: 'id1',
-      aggregateVersion: 1,
+      aggregateVersion: 1+eventIndex,
       type: 'QQQ',
       payload: {
         value: 42,
