@@ -41,7 +41,8 @@ const loadAllEvents = async (
     const result: ScanCommandOutput = await client.send(command)
     const { Items = [], LastEvaluatedKey } = result
 
-    console.log(LastEvaluatedKey)
+    console.log('LastEvaluatedKey',LastEvaluatedKey)
+    console.log('Items',Items)
 
     for (const Item of Items) {
       const event = JSON.parse((Item as any)[AttributeKeys.Event].S)
