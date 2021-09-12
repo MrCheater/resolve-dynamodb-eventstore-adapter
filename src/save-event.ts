@@ -91,7 +91,7 @@ const saveEvent = async (
     const info = await client.send(command)
     console.log(info)
   } catch (error) {
-    if (error.name === 'ConditionalCheckFailedException') {
+    if (/ConditionalCheckFailed/.test(`${error}`)) {
       throw new ConcurrentError(event)
     }
     throw error

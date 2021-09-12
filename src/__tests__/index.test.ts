@@ -31,12 +31,12 @@ test('wip', async () => {
 
   for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
     const requestId = getRandomRequestId()
-    const eventStoreId = eventIndex % 2 === 0 ? eventStoreIds[0]: eventStoreIds[1]
+    const eventStoreId = eventIndex % 2 === 0 ? eventStoreIds[0] : eventStoreIds[1]
     const event: ResolveEvent = {
       eventStoreId,
       requestId,
       aggregateId: 'id1',
-      aggregateVersion: 1+eventIndex,
+      aggregateVersion: 1 + eventIndex,
       type: 'QQQ',
       payload: {
         value: 42,
