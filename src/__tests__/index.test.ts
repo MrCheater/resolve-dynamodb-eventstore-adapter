@@ -18,7 +18,7 @@ test('wip', async () => {
     },
   })
 
-  const eventStoreId = '000001'
+  const eventStoreIds = ['000001', '000002'] as const
 
   const eventsTableName = 'events'
   const cursorsTableName = 'cursors'
@@ -26,10 +26,12 @@ test('wip', async () => {
 
   await init({ client, eventsTableName, cursorsTableName, streamsTableName })
 
-  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreId)
+  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreIds[0])
+  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreIds[1])
 
   for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
     const requestId = getRandomRequestId()
+    const eventStoreId = eventIndex % 2 === 0 ? eventStoreIds[0]: eventStoreIds[1]
     const event: ResolveEvent = {
       eventStoreId,
       requestId,
@@ -45,6 +47,8 @@ test('wip', async () => {
     await saveEvent({ client, eventsTableName, cursorsTableName, streamsTableName }, event)
   }
 
-  console.log('load all events')
-  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreId)
+  console.log('eventstore 1: load all events')
+  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreIds[0])
+  console.log('eventstore 2: load all events')
+  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreIds[1])
 })

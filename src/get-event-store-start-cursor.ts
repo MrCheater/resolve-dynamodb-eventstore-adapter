@@ -4,14 +4,14 @@ import { GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { AttributeKeys } from './constants'
 
 const getEventStoreStartCursor = async (
-  pool: { client: DynamoDBClient; eventStoreStartCursorsTableName: string },
+  pool: { client: DynamoDBClient; cursorsTableName: string },
   eventStoreId: string
 ): Promise<string> => {
-  const { client, eventStoreStartCursorsTableName } = pool
+  const { client, cursorsTableName } = pool
 
   const { Item } = await client.send(
     new GetItemCommand({
-      TableName: eventStoreStartCursorsTableName,
+      TableName: cursorsTableName,
       Key: {
         [AttributeKeys.CursorName]: {
           S: eventStoreId,
@@ -20,7 +20,7 @@ const getEventStoreStartCursor = async (
     })
   )
 
-  const cursor = Item?.primaryKey?.S
+  const cursor = Item?.[AttributeKeys.Cursor]?.S
 
   if (cursor == null) {
     throw new Error(`Event store "${eventStoreId}" does not exists`)

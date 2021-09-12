@@ -54,6 +54,7 @@ const saveEvent = async (
             S: encodedEvent,
           },
         },
+        ConditionExpression: `attribute_not_exists(${AttributeKeys.StreamName}) AND attribute_not_exists(${AttributeKeys.StreamVersion})`,
       },
     })
   }
@@ -76,6 +77,7 @@ const saveEvent = async (
               S: encodedEvent,
             },
           },
+          ConditionExpression: `attribute_not_exists(${AttributeKeys.StreamName}) AND attribute_not_exists(${AttributeKeys.StreamVersion})`,
         },
       })
     }
