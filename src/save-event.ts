@@ -1,37 +1,88 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb'
+import { TransactWriteItemsCommand, TransactWriteItemsInput } from '@aws-sdk/client-dynamodb'
 
 import type { ResolveEvent } from './types'
+import { isResolveCQRSEvent } from './types'
 
-// import encodeEvent from './encode-event'
+import { AttributeKeys } from './constants'
 import ConcurrentError from './concurrent-error'
-import getPrimaryKey from './get-primary-key'
+import createCursor from './create-cursor'
 
 const saveEvent = async (
-  pool: { client: DynamoDBClient; eventsTableName: string},
+  pool: {
+    client: DynamoDBClient
+    eventsTableName: string
+    cursorsTableName: string
+    streamsTableName: string
+  },
   event: ResolveEvent
 ) => {
-  const { client, eventsTableName} = pool
+  const { client, eventsTableName, streamsTableName } = pool
 
-  // const items = encodeEvent(event)
+  const cursor = createCursor(event)
+  const encodedEvent = JSON.stringify(event)
 
-  const command = new TransactWriteItemsCommand({
-    TransactItems: [
-      {
-        Put: {
-          TableName: eventsTableName,
-          Item: {
-            primaryKey: {
-              S: getPrimaryKey(event)
-            },
-            event: {
-              S: JSON.stringify(event)
-            }
-          }
-//          Item: encodeEvent(event),
+  const TransactItems: TransactWriteItemsInput['TransactItems'] = [
+    {
+      Put: {
+        TableName: eventsTableName,
+        Item: {
+          [AttributeKeys.Cursor]: {
+            S: cursor,
+          },
+          [AttributeKeys.Event]: {
+            S: encodedEvent,
+          },
         },
       },
-    ],
+    },
+  ]
+
+  if (isResolveCQRSEvent(event)) {
+    const streamName = `${event.eventStoreId}/${event.aggregateId}`
+    TransactItems.push({
+      Put: {
+        TableName: streamsTableName,
+        Item: {
+          [AttributeKeys.StreamName]: {
+            S: streamName,
+          },
+          [AttributeKeys.StreamVersion]: {
+            N: `${event.aggregateVersion}`,
+          },
+          [AttributeKeys.Event]: {
+            S: encodedEvent,
+          },
+        },
+      },
+    })
+  }
+
+  const { streamIds } = event
+  if (streamIds != null) {
+    for (const [streamId, streamVersion] of Object.entries(streamIds)) {
+      const streamName = `${event.eventStoreId}/${streamId}}`
+      TransactItems.push({
+        Put: {
+          TableName: streamsTableName,
+          Item: {
+            [AttributeKeys.StreamName]: {
+              S: streamName,
+            },
+            [AttributeKeys.StreamVersion]: {
+              N: `${streamVersion}`,
+            },
+            [AttributeKeys.Event]: {
+              S: encodedEvent,
+            },
+          },
+        },
+      })
+    }
+  }
+
+  const command = new TransactWriteItemsCommand({
+    TransactItems,
   })
 
   try {
@@ -39,7 +90,7 @@ const saveEvent = async (
     console.log(info)
   } catch (error) {
     if (error.name === 'ConditionalCheckFailedException') {
-      // throw new ConcurrentError('aggregate', event.aggregateId)
+      throw new ConcurrentError(event)
     }
     throw error
   }

@@ -5,6 +5,8 @@ import type { ResolveEvent } from '../types'
 import init from '../init'
 import saveEvent from '../save-event'
 import loadAllEvents from '../load-all-events'
+import createEventStore from '../create-event-store'
+import getRandomRequestId from '../get-random-request-id'
 
 test('wip', async () => {
   const client = new DynamoDBClient({
@@ -16,14 +18,18 @@ test('wip', async () => {
     },
   })
 
-  const eventStoreId = '00001'
+  const eventStoreId = '000001'
 
   const eventsTableName = 'events'
+  const cursorsTableName = 'cursors'
+  const streamsTableName = 'streams'
 
-  await init({ client, eventsTableName })
+  await init({ client, eventsTableName, cursorsTableName, streamsTableName })
 
-  for(let eventIndex = 0; eventIndex < 10; eventIndex++) {
-    const requestId = `${Math.floor(Math.random()*100000)}`.padStart(5, '0')
+  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreId)
+
+  for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
+    const requestId = getRandomRequestId()
     const event: ResolveEvent = {
       eventStoreId,
       requestId,
@@ -36,14 +42,9 @@ test('wip', async () => {
       timestamp: new Date(eventIndex).getTime(),
     }
 
-    await saveEvent({ client, eventsTableName }, event)
+    await saveEvent({ client, eventsTableName, cursorsTableName, streamsTableName }, event)
   }
 
-  const startTime = new Date(5).getTime()
-
   console.log('load all events')
-  await loadAllEvents({ client, eventsTableName }, eventStoreId)
-
-  console.log('load half events')
-  await loadAllEvents({ client, eventsTableName }, eventStoreId, startTime)
+  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreId)
 })
