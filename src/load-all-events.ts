@@ -41,7 +41,7 @@ const loadAllEvents = async (
         ScanIndexForward: true,
         Limit: 2,
         KeyConditions: {
-          _: {
+          [AttributeKeys.Cursor]: {
             ComparisonOperator: 'BEGINS_WITH',
             AttributeValueList: [{ S: eventStoreId }],
           },
