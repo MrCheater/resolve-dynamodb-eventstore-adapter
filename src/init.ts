@@ -36,21 +36,13 @@ const init = async (pool: {
         {
           AttributeName: AttributeKeys.StreamName,
           AttributeType: 'S',
-        },
-        {
-          AttributeName: AttributeKeys.StreamVersion,
-          AttributeType: 'N',
-        },
+        }
       ],
       KeySchema: [
         {
           AttributeName: AttributeKeys.StreamName,
           KeyType: 'HASH',
-        },
-        {
-          AttributeName: AttributeKeys.StreamVersion,
-          KeyType: 'RANGE',
-        },
+        }
       ],
     })
   )
