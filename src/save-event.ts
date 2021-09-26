@@ -50,6 +50,7 @@ const saveEvent = async (
           '#streamVersion': AttributeKeys.StreamVersion,
         },
         ExpressionAttributeValues: {
+          ':time': { N: `${event.timestamp}` },
           ':aggregateVersion': { N: `${event.aggregateVersion}` },
           ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` },
           ':defaultStreamVersion': { N: `0` },
