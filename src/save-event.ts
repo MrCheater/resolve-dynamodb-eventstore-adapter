@@ -12,7 +12,6 @@ const saveEvent = async (
   pool: {
     client: DynamoDBClient
     eventsTableName: string
-    cursorsTableName: string
     streamsTableName: string
   },
   event: ResolveEvent

@@ -1,37 +1,24 @@
 import type { DynamoDBClient, AttributeValue } from '@aws-sdk/client-dynamodb'
 import { QueryCommand, QueryCommandOutput } from '@aws-sdk/client-dynamodb'
 
-import getEventStoreStartCursor from './get-event-store-start-cursor'
 import { AttributeKeys } from './constants'
 
 const loadAllEvents = async (
-  pool: { client: DynamoDBClient; eventsTableName: string; cursorsTableName: string },
+  pool: { client: DynamoDBClient; eventsTableName: string},
   eventStoreId: string,
   cursor?: string
 ) => {
-  const { client, eventsTableName, cursorsTableName } = pool
+  const { client, eventsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
 
-  // if (cursor != null) {
-  //   PrevLastEvaluatedKey = {
-  //     [AttributeKeys.Cursor]: {
-  //       S: cursor,
-  //     },
-  //   }
-  // } else {
-  //   PrevLastEvaluatedKey = {
-  //     [AttributeKeys.Cursor]: {
-  //       S: await getEventStoreStartCursor(
-  //         {
-  //           client,
-  //           cursorsTableName,
-  //         },
-  //         eventStoreId
-  //       ),
-  //     },
-  //   }
-  // }
+  if (cursor != null) {
+    PrevLastEvaluatedKey = {
+      [AttributeKeys.Cursor]: {
+        S: cursor,
+      },
+    }
+  }
 
   do {
     const { Items = [], LastEvaluatedKey }: QueryCommandOutput = await client.send(
@@ -39,13 +26,7 @@ const loadAllEvents = async (
         TableName: eventsTableName,
         ExclusiveStartKey: PrevLastEvaluatedKey,
         ScanIndexForward: true,
-        Limit: 2,
-        KeyConditions: {
-          [AttributeKeys.Cursor]: {
-            ComparisonOperator: 'BEGINS_WITH',
-            AttributeValueList: [{ S: eventStoreId }],
-          },
-        },
+        Limit: 2
       })
     )
 

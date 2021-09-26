@@ -5,7 +5,6 @@ import type { ResolveEvent } from '../types'
 import init from '../init'
 import saveEvent from '../save-event'
 import loadAllEvents from '../load-all-events'
-import createEventStore from '../create-event-store'
 import getRandomRequestId from '../get-random-request-id'
 
 test('wip', async () => {
@@ -21,13 +20,9 @@ test('wip', async () => {
   const eventStoreIds = ['000001', '000002'] as const
 
   const eventsTableName = 'events'
-  const cursorsTableName = 'cursors'
   const streamsTableName = 'streams'
 
-  await init({ client, eventsTableName, cursorsTableName, streamsTableName })
-
-  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreIds[0])
-  await createEventStore({ client, eventsTableName, cursorsTableName }, eventStoreIds[1])
+  await init({ client, eventsTableName, streamsTableName })
 
   for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
     const requestId = getRandomRequestId()
@@ -44,11 +39,11 @@ test('wip', async () => {
       timestamp: new Date(eventIndex).getTime(),
     }
 
-    await saveEvent({ client, eventsTableName, cursorsTableName, streamsTableName }, event)
+    await saveEvent({ client, eventsTableName, streamsTableName }, event)
   }
 
   console.log('eventstore 1: load all events')
-  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreIds[0])
+  await loadAllEvents({ client, eventsTableName }, eventStoreIds[0])
   console.log('eventstore 2: load all events')
-  await loadAllEvents({ client, eventsTableName, cursorsTableName }, eventStoreIds[1])
+  await loadAllEvents({ client, eventsTableName }, eventStoreIds[1])
 })

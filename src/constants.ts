@@ -5,7 +5,3 @@ export enum AttributeKeys {
   StreamName = 'd',
   StreamVersion = 'e',
 }
-
-export enum SystemEventTypes {
-  EventStoreCreated = 'EVENT_STORE_CREATED',
-}

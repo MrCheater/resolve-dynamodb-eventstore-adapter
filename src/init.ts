@@ -1,15 +1,14 @@
-import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { CreateTableCommand } from '@aws-sdk/client-dynamodb'
+import type {DynamoDBClient} from '@aws-sdk/client-dynamodb'
+import {CreateTableCommand} from '@aws-sdk/client-dynamodb'
 
-import { AttributeKeys } from './constants'
+import {AttributeKeys} from './constants'
 
 const init = async (pool: {
   client: DynamoDBClient
   eventsTableName: string
-  cursorsTableName: string
   streamsTableName: string
 }) => {
-  const { client, eventsTableName, cursorsTableName, streamsTableName } = pool
+  const { client, eventsTableName, streamsTableName } = pool
 
   await client.send(
     new CreateTableCommand({
@@ -25,21 +24,7 @@ const init = async (pool: {
           AttributeName: AttributeKeys.Cursor,
           KeyType: 'HASH',
         },
-      ],
-    })
-  )
-
-  await client.send(
-    new CreateTableCommand({
-      TableName: cursorsTableName,
-      BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [{ AttributeName: AttributeKeys.CursorName, AttributeType: 'S' }],
-      KeySchema: [
-        {
-          AttributeName: AttributeKeys.CursorName,
-          KeyType: 'HASH',
-        },
-      ],
+      ]
     })
   )
 

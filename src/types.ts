@@ -48,7 +48,6 @@ export type DynamoDBEvent = {
   payload: {
     S: string
   }
-
   requestId: {
     S: string
   }
