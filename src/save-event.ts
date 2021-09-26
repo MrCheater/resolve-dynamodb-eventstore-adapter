@@ -45,16 +45,16 @@ const saveEvent = async (
         Item: {
           [AttributeKeys.StreamName]: { S: streamName },
           [AttributeKeys.StreamVersion]: { S: `${event.aggregateVersion}` },
-          [AttributeKeys.Timestamp]: { N: `${event.timestamp}`}
+          [AttributeKeys.Timestamp]: { N: `${event.timestamp}` },
         },
         ExpressionAttributeNames: {
           '#aggregateVersion': AttributeKeys.StreamVersion,
         },
         ExpressionAttributeValues: {
-          ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` }
+          ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` },
         },
         ConditionExpression: `#aggregateVersion = :prevAggregateVersion`,
-        ReturnValuesOnConditionCheckFailure: 'NONE'
+        ReturnValuesOnConditionCheckFailure: 'NONE',
       },
     })
   }
@@ -67,7 +67,7 @@ const saveEvent = async (
         Update: {
           TableName: streamsTableName,
           Key: {
-            [AttributeKeys.StreamName]: { S: streamName }
+            [AttributeKeys.StreamName]: { S: streamName },
           },
           ExpressionAttributeNames: {
             '#time': AttributeKeys.Timestamp,
@@ -80,9 +80,8 @@ const saveEvent = async (
             ':defaultStreamVersion': { N: `0` },
             ':inc': { N: `1` },
           },
-          UpdateExpression:
-            `SET #streamVersion = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :inc, #time = :time, #streamName = :streamName`,
-          ReturnValuesOnConditionCheckFailure: 'NONE'
+          UpdateExpression: `SET #streamVersion = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :inc, #time = :time, #streamName = :streamName`,
+          ReturnValuesOnConditionCheckFailure: 'NONE',
         },
       })
     }

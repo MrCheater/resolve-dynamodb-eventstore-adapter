@@ -4,10 +4,10 @@ import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 import { AttributeKeys } from './constants'
 
 const loadAllEvents = async (
-  pool: { client: DynamoDBClient; eventsTableName: string,     streamsTableName: string},
+  pool: { client: DynamoDBClient; eventsTableName: string; streamsTableName: string },
   cursor?: string
 ) => {
-  const { client, eventsTableName,streamsTableName } = pool
+  const { client, eventsTableName, streamsTableName } = pool
 
   let PrevLastEvaluatedKey: { [key: string]: AttributeValue } | undefined = undefined
 
@@ -24,7 +24,7 @@ const loadAllEvents = async (
       new ScanCommand({
         TableName: eventsTableName,
         ExclusiveStartKey: PrevLastEvaluatedKey,
-        Limit: 2
+        Limit: 2,
       })
     )
 
@@ -39,7 +39,7 @@ const loadAllEvents = async (
       new ScanCommand({
         TableName: streamsTableName,
         ExclusiveStartKey: PrevLastEvaluatedKey,
-        Limit: 2
+        Limit: 2,
       })
     )
 

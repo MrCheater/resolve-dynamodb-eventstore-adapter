@@ -1,7 +1,7 @@
-import type {DynamoDBClient} from '@aws-sdk/client-dynamodb'
-import {CreateTableCommand} from '@aws-sdk/client-dynamodb'
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { CreateTableCommand } from '@aws-sdk/client-dynamodb'
 
-import {AttributeKeys} from './constants'
+import { AttributeKeys } from './constants'
 
 const init = async (pool: {
   client: DynamoDBClient
@@ -24,7 +24,7 @@ const init = async (pool: {
           AttributeName: AttributeKeys.Cursor,
           KeyType: 'HASH',
         },
-      ]
+      ],
     })
   )
 
@@ -36,13 +36,13 @@ const init = async (pool: {
         {
           AttributeName: AttributeKeys.StreamName,
           AttributeType: 'S',
-        }
+        },
       ],
       KeySchema: [
         {
           AttributeName: AttributeKeys.StreamName,
           KeyType: 'HASH',
-        }
+        },
       ],
     })
   )
