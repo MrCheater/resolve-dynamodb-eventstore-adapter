@@ -17,16 +17,15 @@ test('wip', async () => {
     },
   })
 
-  const eventStoreIds = ['000001', '000002'] as const
+  const eventStoreId = '000001'
 
   const eventsTableName = 'events'
   const streamsTableName = 'streams'
 
   await init({ client, eventsTableName, streamsTableName })
 
-  for (let eventIndex = 0; eventIndex < 1; eventIndex++) {
+  for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
     const requestId = getRandomRequestId()
-    const eventStoreId = eventIndex % 2 === 0 ? eventStoreIds[0] : eventStoreIds[1]
     const event: ResolveEvent = {
       eventStoreId,
       requestId,
