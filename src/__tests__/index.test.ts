@@ -24,7 +24,7 @@ test('wip', async () => {
 
   await init({ client, eventsTableName, streamsTableName })
 
-  for (let eventIndex = 0; eventIndex < 10; eventIndex++) {
+  for (let eventIndex = 0; eventIndex < 1; eventIndex++) {
     const requestId = getRandomRequestId()
     const eventStoreId = eventIndex % 2 === 0 ? eventStoreIds[0] : eventStoreIds[1]
     const event: ResolveEvent = {
@@ -42,8 +42,6 @@ test('wip', async () => {
     await saveEvent({ client, eventsTableName, streamsTableName }, event)
   }
 
-  console.log('eventstore 1: load all events')
-  await loadAllEvents({ client, eventsTableName }, eventStoreIds[0])
-  console.log('eventstore 2: load all events')
-  await loadAllEvents({ client, eventsTableName }, eventStoreIds[1])
+  console.log('load all events')
+  await loadAllEvents({ client, eventsTableName, streamsTableName })
 })
