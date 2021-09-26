@@ -52,8 +52,7 @@ const saveEvent = async (
         ExpressionAttributeValues: {
           ':time': { N: `${event.timestamp}` },
           ':aggregateVersion': { N: `${event.aggregateVersion}` },
-          ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` },
-          ':defaultStreamVersion': { N: `0` },
+          ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` }
         },
         UpdateExpression: `SET #streamVersion = :aggregateVersion, #time = :time`,
         ConditionExpression: `#streamVersion = :prevAggregateVersion`,
