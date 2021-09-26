@@ -1,4 +1,4 @@
-import { isResolveCQRSEvent, ResolveEvent } from './types'
+import { ResolveEvent } from './types'
 
 class ConcurrentError extends Error {
   constructor(event: ResolveEvent) {
@@ -13,16 +13,11 @@ class ConcurrentError extends Error {
         ? `stream "${streamIds[0]}"`
         : `streams ${streamIds.map((streamId) => `"${streamId}"`).concat(', ')}`
 
-    if (isResolveCQRSEvent(event)) {
-      message += `aggregate "${event.aggregateId}"`
-      if (streamCount > 0) {
-        message += `or ${streamMessage} are`
-      }
-    } else if (streamCount === 1) {
-      message += `${streamMessage} is`
-    } else {
-      message += `${streamMessage} are`
+    message += `aggregate "${event.aggregateId}"`
+    if (streamCount > 0) {
+      message += `or ${streamMessage} are`
     }
+
     message += ` currently out of date. Please retry later.`
 
     super(message)

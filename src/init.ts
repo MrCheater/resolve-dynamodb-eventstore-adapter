@@ -6,9 +6,10 @@ import { AttributeKeys } from './constants'
 const init = async (pool: {
   client: DynamoDBClient
   eventsTableName: string
+  aggregatesTableName: string
   streamsTableName: string
 }) => {
-  const { client, eventsTableName, streamsTableName } = pool
+  const { client, eventsTableName, aggregatesTableName, streamsTableName } = pool
 
   await client.send(
     new CreateTableCommand({
@@ -22,6 +23,25 @@ const init = async (pool: {
       KeySchema: [
         {
           AttributeName: AttributeKeys.Cursor,
+          KeyType: 'HASH',
+        },
+      ],
+    })
+  )
+
+  await client.send(
+    new CreateTableCommand({
+      TableName: aggregatesTableName,
+      BillingMode: 'PAY_PER_REQUEST',
+      AttributeDefinitions: [
+        {
+          AttributeName: AttributeKeys.AggregateName,
+          AttributeType: 'S',
+        },
+      ],
+      KeySchema: [
+        {
+          AttributeName: AttributeKeys.AggregateVersion,
           KeyType: 'HASH',
         },
       ],
