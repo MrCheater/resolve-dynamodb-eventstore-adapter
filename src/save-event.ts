@@ -67,12 +67,11 @@ const saveEvent = async (
             [AttributeKeys.StreamName]: { S: streamName },
           },
           ExpressionAttributeValues: {
-            ':streamName': { S: streamName },
             ':time': { N: `${event.timestamp}` },
             ':defaultStreamVersion': { N: `0` },
-            ':inc': { N: `1` },
+            ':incr': { N: `1` },
           },
-          UpdateExpression: `SET ${AttributeKeys.StreamVersion} = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :inc, ${AttributeKeys.Timestamp} = :time, ${AttributeKeys.StreamName} = :streamName`,
+          UpdateExpression: `SET ${AttributeKeys.StreamVersion} = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :incr, ${AttributeKeys.Timestamp} = :time`,
 
           // ReturnValuesOnConditionCheckFailure: 'NONE',
         },
