@@ -29,13 +29,14 @@ test('wip', async () => {
     const event: ResolveEvent = {
       eventStoreId,
       requestId,
-      aggregateId: 'id1',
-      aggregateVersion: 1 + eventIndex,
+      // aggregateId: 'id1',
+      // aggregateVersion: 1 + eventIndex,
       type: 'QQQ',
       payload: {
         value: 42,
       },
       timestamp: new Date(eventIndex).getTime(),
+      streamIds: ['id1']
     }
 
     await saveEvent({ client, eventsTableName, streamsTableName }, event)
