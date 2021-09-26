@@ -41,7 +41,7 @@ const init = async (pool: {
       ],
       KeySchema: [
         {
-          AttributeName: AttributeKeys.AggregateVersion,
+          AttributeName: AttributeKeys.AggregateName,
           KeyType: 'HASH',
         },
       ],
