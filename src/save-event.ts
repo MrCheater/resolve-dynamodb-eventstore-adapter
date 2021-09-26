@@ -44,7 +44,7 @@ const saveEvent = async (
         TableName: streamsTableName,
         Item: {
           [AttributeKeys.StreamName]: { S: streamName },
-          [AttributeKeys.StreamVersion]: { S: `${event.aggregateVersion}` },
+          [AttributeKeys.StreamVersion]: { N: `${event.aggregateVersion}` },
           [AttributeKeys.Timestamp]: { N: `${event.timestamp}` },
         },
         ExpressionAttributeValues: {
