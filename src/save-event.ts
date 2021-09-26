@@ -47,13 +47,10 @@ const saveEvent = async (
           [AttributeKeys.StreamVersion]: { S: `${event.aggregateVersion}` },
           [AttributeKeys.Timestamp]: { N: `${event.timestamp}` },
         },
-        ExpressionAttributeNames: {
-          '#aggregateVersion': AttributeKeys.StreamVersion,
-        },
         ExpressionAttributeValues: {
           ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` },
         },
-        ConditionExpression: `#aggregateVersion = :prevAggregateVersion`,
+        ConditionExpression: `${AttributeKeys.StreamVersion} = :prevAggregateVersion OR attribute_not_exists(${AttributeKeys.StreamName})`,
         ReturnValuesOnConditionCheckFailure: 'NONE',
       },
     })
