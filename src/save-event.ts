@@ -40,22 +40,20 @@ const saveEvent = async (
   if (isResolveCQRSEvent(event)) {
     const streamName = `${event.eventStoreId}/${event.aggregateId}`
     TransactItems.push({
-      Update: {
+      Put: {
         TableName: streamsTableName,
-        Key: {
-          [AttributeKeys.StreamName]: { S: streamName }
+        Item: {
+          [AttributeKeys.StreamName]: { S: streamName },
+          [AttributeKeys.StreamVersion]: { S: `${event.aggregateVersion}` },
+          [AttributeKeys.Timestamp]: { N: `${event.timestamp}`}
         },
         ExpressionAttributeNames: {
-          '#time': AttributeKeys.Timestamp,
-          '#streamVersion': AttributeKeys.StreamVersion,
+          '#aggregateVersion': AttributeKeys.StreamVersion,
         },
         ExpressionAttributeValues: {
-          ':time': { N: `${event.timestamp}` },
-          ':aggregateVersion': { N: `${event.aggregateVersion}` },
           ':prevAggregateVersion': { N: `${event.aggregateVersion - 1}` }
         },
-        UpdateExpression: `SET #streamVersion = :aggregateVersion, #time = :time`,
-        ConditionExpression: `#streamVersion = :prevAggregateVersion`,
+        ConditionExpression: `#aggregateVersion = :prevAggregateVersion`,
         ReturnValuesOnConditionCheckFailure: 'NONE'
       },
     })
@@ -63,7 +61,7 @@ const saveEvent = async (
 
   const { streamIds } = event
   if (streamIds != null) {
-    for (const [streamId, streamVersion] of Object.entries(streamIds)) {
+    for (const streamId of streamIds) {
       const streamName = `${event.eventStoreId}/${streamId}}`
       TransactItems.push({
         Update: {
@@ -73,19 +71,35 @@ const saveEvent = async (
           },
           ExpressionAttributeNames: {
             '#time': AttributeKeys.Timestamp,
+            '#streamName': AttributeKeys.StreamName,
             '#streamVersion': AttributeKeys.StreamVersion,
           },
           ExpressionAttributeValues: {
+            ':streamName': { S: streamName },
             ':time': { N: `${event.timestamp}` },
             ':defaultStreamVersion': { N: `0` },
             ':inc': { N: `1` },
           },
           UpdateExpression:
-            `SET #streamVersion = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :inc, #time = :time`,
+            `SET #streamVersion = if_not_exists(${AttributeKeys.StreamVersion}, :defaultStreamVersion) + :inc, #time = :time, #streamName = :streamName`,
           ReturnValuesOnConditionCheckFailure: 'NONE'
         },
       })
     }
+    /*
+    table.update_item(
+    Key={
+        'key': my_key
+    },
+    UpdateExpression="SET my_value = if_not_exists(my_value, :start) + :inc",
+
+    ExpressionAttributeValues={
+        ':inc': my_increment,
+        ':start': 0,
+    },
+    ReturnValues="UPDATED_NEW"
+)
+     */
   }
 
   const command = new TransactWriteItemsCommand({

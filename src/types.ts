@@ -6,13 +6,13 @@ export type ResolveCQRSEvent = {
   type: string
   payload: Record<string, any>
   timestamp: number
-  streamIds?: Record<string, number>
+  streamIds: Array<string>
 }
 
 export type ResolveRawEvent = {
   eventStoreId: string
   requestId: string
-  streamIds: Record<string, number>
+  streamIds: Array<string>
   type: string
   payload: Record<string, any>
   timestamp: number
