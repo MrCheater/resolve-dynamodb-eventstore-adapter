@@ -1,5 +1,5 @@
 import type { DynamoDBClient, AttributeValue } from '@aws-sdk/client-dynamodb'
-import { QueryCommand, QueryCommandOutput } from '@aws-sdk/client-dynamodb'
+import { ScanCommand, ScanCommandOutput } from '@aws-sdk/client-dynamodb'
 
 import { AttributeKeys } from './constants'
 
@@ -21,11 +21,10 @@ const loadAllEvents = async (
   }
 
   do {
-    const { Items = [], LastEvaluatedKey }: QueryCommandOutput = await client.send(
-      new QueryCommand({
+    const { Items = [], LastEvaluatedKey }: ScanCommandOutput = await client.send(
+      new ScanCommand({
         TableName: eventsTableName,
         ExclusiveStartKey: PrevLastEvaluatedKey,
-        ScanIndexForward: true,
         Limit: 2
       })
     )

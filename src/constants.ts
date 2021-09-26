@@ -4,4 +4,5 @@ export enum AttributeKeys {
   CursorName = 'c',
   StreamName = 'd',
   StreamVersion = 'e',
+  Timestamp = 'f',
 }
